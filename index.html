@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>A Dream Made of Flowers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+  <style>
+/* ============ 1. Identidade ============ */
+:root {
+  --void: #000;
+  --wine: #6e0b1f;
+  --rose: #b3263f;
+  --bone: #e9d6cc;
+  --serif: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+}
+
+/* ============ 2. Base ============ */
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; background: var(--void); color: var(--bone); overflow: hidden;
+  font-family: var(--serif); -webkit-font-smoothing: antialiased; }
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+/* ============ 3. Camadas de atmosfera ============ */
+.layer { position: fixed; inset: 0; pointer-events: none; }
+.glow { mix-blend-mode: screen;
+  background: radial-gradient(ellipse 45% 40% at 50% 46%, rgba(110, 11, 31, .38), transparent 70%);
+  animation: breathe 9s ease-in-out infinite; }
+.vignette { background: radial-gradient(ellipse at center, transparent 42%, #000 100%); }
+.grain { opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+@keyframes breathe { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+
+/* ============ 4. Interface ============ */
+.ui { position: fixed; inset: 0; pointer-events: none; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; text-align: center;
+  padding: 0 1.5rem calc(7vh + env(safe-area-inset-bottom, 0px)); }
+
+.title { font-weight: 300; font-size: clamp(.78rem, 1.5vw, 1.1rem); letter-spacing: .62em;
+  padding-left: .62em; line-height: 2.4; max-width: 34ch; }
+.title .word { display: inline-block; white-space: nowrap; margin: 0 .35em; }
+.title .ch { display: inline-block; opacity: 0; }
+
+.enter { pointer-events: auto; cursor: pointer; background: none; border: 0; color: var(--bone);
+  font: italic 300 clamp(1.05rem, 1.8vw, 1.35rem)/1 var(--serif); letter-spacing: .18em;
+  padding: 1.4rem 2rem .6rem; margin-top: 1.6rem; position: relative; opacity: 0; }
+.enter:disabled { pointer-events: none; }
+.enter::before { content: ''; position: absolute; top: 0; left: 50%; width: 3.2rem; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rose), transparent);
+  transform: translateX(-50%); transition: width .8s cubic-bezier(.2, .7, .1, 1); }
+.enter:hover::before, .enter:focus-visible::before { width: 8rem; }
+.enter:focus-visible { outline: 1px solid var(--rose); outline-offset: 4px; }
+
+.nogl { position: fixed; top: max(1rem, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: min(92vw, 46ch);
+  text-align: center; font: italic 300 .95rem/1.5 var(--serif); opacity: .7; pointer-events: none; z-index: 5; }
+
+/* Sem WebGL: a jornada continua, com uma atmosfera em CSS no lugar da cena 3D */
+.nowebgl #scene { display: none; }
+.nowebgl .glow { opacity: 1; mix-blend-mode: normal; animation: breathe 9s ease-in-out infinite;
+  background: radial-gradient(ellipse 36% 32% at 50% 44%, rgba(179, 38, 63, .5), rgba(110, 11, 31, .34) 48%, transparent 74%),
+              radial-gradient(circle at 28% 72%, rgba(110, 11, 31, .26), transparent 42%),
+              radial-gradient(circle at 74% 26%, rgba(110, 11, 31, .2), transparent 40%); }
+.nogsap .title .ch { opacity: .92; }
+
+@media (prefers-reduced-motion: reduce) { .glow { animation: none; } }
+
+/* ============ 5. Poemas ============ */
+.glow { opacity: .5; }
+.poem { position: absolute; left: 50%; bottom: calc(15vh + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  width: min(92vw, 40ch); text-align: center; pointer-events: none; }
+.poem::before { content: ''; position: absolute; inset: -4rem -3rem; z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, .62), transparent 72%); }
+.poem .ln { font: italic 300 clamp(1.12rem, 2.1vw, 1.6rem)/1.8 var(--serif); letter-spacing: .02em;
+  text-shadow: 0 0 22px #000, 0 0 3px #000; opacity: 0; }
+.poem.final .ln { font-size: clamp(1.5rem, 3.2vw, 2.4rem); letter-spacing: .12em; }
+
+.next { position: absolute; right: max(1.2rem, env(safe-area-inset-right, 0px)); bottom: calc(2.4vh + env(safe-area-inset-bottom, 0px));
+  pointer-events: none; cursor: pointer; background: none; border: 0; color: var(--bone); opacity: 0;
+  font: italic 300 1rem/1 var(--serif); letter-spacing: .14em; padding: .8rem 1rem; transition: opacity .5s ease; }
+.next.on { pointer-events: auto; opacity: .45; }
+.next.on:hover, .next.on:focus-visible { opacity: .95; }
+.next:focus-visible { outline: 1px solid var(--rose); outline-offset: 3px; }
+
+</style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div class="layer glow"></div>
+  <div class="layer vignette"></div>
+  <div class="layer grain"></div>
+
+  <main class="ui">
+    <h1 id="title" class="title" aria-label="A Dream Made of Flowers">A DREAM MADE OF FLOWERS</h1>
+    <button id="enter" class="enter" type="button" disabled>Entrar</button>
+    <section id="poem" class="poem" aria-live="polite"></section>
+    <button id="next" class="next" type="button" aria-label="Continuar para o próximo poema">Continuar</button>
+  </main>
+  <p id="nogl" class="nogl" role="status" hidden></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>window.THREE || document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>window.gsap || document.write('<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"><\/script>')</script>
+  <script>
+(() => {
+  'use strict';
+
+  const noteEl = document.getElementById('nogl');
+  const note = (msg) => { noteEl.textContent = msg; noteEl.hidden = false; };
+  if (typeof gsap === 'undefined') {
+    document.body.classList.add('nowebgl', 'nogsap');
+    note('Não foi possível carregar as bibliotecas da página. Verifique a conexão ou bloqueadores de conteúdo e recarregue.');
+    return;
+  }
+
+  /* ============================================================
+   * A DREAM MADE OF FLOWERS
+   * 1 Configuração · 2 Renderer e pós-processamento · 3 Cena
+   * 4 Estado do ambiente e vento · 5 Loop · 6 Poemas e jornada
+   * ============================================================ */
+
+  /* ---------- 1. Configuração ---------- */
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const small = Math.min(innerWidth, innerHeight) < 700 || matchMedia('(pointer: coarse)').matches;
+  const FLOOR = -1.1;
+  const dpr = Math.min(devicePixelRatio || 1, small ? 1.5 : 1.75);
+  const q = { scale: small ? 0.75 : 1, taps: small ? 8 : 14, refl: small ? 0.35 : 0.5, rays: small ? 10 : 20, reflOn: true };
+  const D = (s) => (reduced ? Math.max(0.01, s * 0.2) : s);
+
+  const POEMS = [
+    [ // I
+      ['Antes de você, o silêncio', 'era só uma casa sem janelas.', 'Depois, uma luz pequena', 'aprendeu o meu nome.'],
+      ['Há flores que pedem anos para abrir.', 'Com você aprendi a esperar', 'sem pressa e sem medo,', 'como quem confia na própria primavera.'],
+      ['Se o mundo escurecesse inteiro,', 'eu ainda saberia te encontrar:', 'pelo calor que você deixa no ar,', 'pelo jeito como tudo em mim se acalma.'],
+    ],
+    [ // II
+      ['O tempo passa como o vento nas pétalas:', 'leva o que é leve', 'e deixa só o que sempre foi raiz.', 'Você é raiz.'],
+      ['Eu não te amo como se ama o que é perfeito.', 'Eu te amo como se ama o que é vivo:', 'nos dias bons, nos dias cansados,', 'com a coragem de ficar.'],
+      ['Que o vento me leve tudo,', 'menos o jeito que você ri', 'quando acha que ninguém está olhando.', 'Esse eu guardo como se guarda um segredo de luz.'],
+    ],
+    [ // III
+      ['Tudo o que é belo acontece devagar:', 'a flor, o amanhecer,', 'a certeza de que é com você', 'que eu quero cada devagar.'],
+      ['Um dia as flores se desfazem em luz,', 'e ainda assim nada se perde:', 'o que foi amor vira lugar,', 'e eu moro em você.'],
+      ['Se eu esquecer todas as palavras,', 'que fique o gesto de te procurar na multidão.', 'Meu coração já sabe o caminho.', 'Ele sempre soube.'],
+    ],
+  ];
+
+  /* ---------- 2. Renderer e pós-processamento ---------- */
+  const E = { camX: 0, camY: 0.5, camZ: 18, lookY: 0.1, moonI: 2, rays: 0.4, bloom: 0.75, fade: 0, wind: 0.4, flutter: 1,
+    boost: 0, floorI: 0.55, heroOpen: 0.04, dissolve: 0, keyI: 1.7 };
+  const W = { gust: 0 };
+  (function gusts() {                          // rajadas esporádicas
+    gsap.delayedCall((reduced ? 14 : 6) + Math.random() * 8, () => {
+      gsap.to(W, { gust: reduced ? 0.4 : 1, duration: 2.4, yoyo: true, repeat: 1, ease: 'sine.inOut' }); gusts();
+    });
+  })();
+
+  const rgb = (h) => ({ r: ((h >> 16) & 255) / 255, g: ((h >> 8) & 255) / 255, b: (h & 255) / 255 });
+  const keyColor = rgb(0xffc2c8);                    // estado de luz/lua usado pela jornada, com ou sem 3D
+  const moonPos = { x: -6, y: 7, z: -14 };
+
+  // Cria o contexto com atributos cada vez mais simples (WebGL2 → WebGL1), num canvas novo a cada tentativa.
+  function createRenderer() {
+    const names = ['webgl2', 'webgl', 'experimental-webgl'];
+    const attempts = [{ antialias: false, powerPreference: 'high-performance' }, { antialias: false },
+      { antialias: false, alpha: false, depth: true, stencil: false, failIfMajorPerformanceCaveat: false }];
+    for (const attrs of attempts) {
+      const old = document.getElementById('scene'), c = old.cloneNode(false);
+      old.replaceWith(c);
+      let gl = null;
+      for (const n of names) { try { gl = c.getContext(n, attrs); } catch (e) { gl = null; } if (gl) break; }
+      if (!gl) continue;
+      try { return { renderer: new THREE.WebGLRenderer({ canvas: c, context: gl }), canvas: c }; }
+      catch (e) { console.warn('WebGL:', e); }
+    }
+    return null;
+  }
+
+  let stage = null;
+  if (typeof THREE === 'undefined') note('Não foi possível carregar o motor 3D (verifique a conexão ou bloqueadores de conteúdo). Seguindo sem 3D.');
+  else {
+    stage = createRenderer();
+    if (!stage) note('Seu navegador não conseguiu iniciar o WebGL. Ative a aceleração de hardware ou use um navegador atualizado. Seguindo sem 3D.');
+  }
+  if (!stage) document.body.classList.add('nowebgl'); else start3D(stage.renderer, stage.canvas);
+
+  function start3D(renderer, canvas) {
+  renderer.setPixelRatio(dpr);
+  renderer.outputEncoding = THREE.sRGBEncoding;          // usados só no modo direto (sem pós-processamento)
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
+  let lite = !renderer.capabilities.isWebGL2;            // WebGL1: render direto, sem DoF/bloom/reflexo
+  const hdr = renderer.capabilities.isWebGL2 && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
+  canvas.addEventListener('webglcontextlost', (e) => e.preventDefault());
+  canvas.addEventListener('webglcontextrestored', () => location.reload());
+  function enableLite() { lite = true; floor.visible = false; renderer.setRenderTarget(null); }
+
+  const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+  const fsScene = new THREE.Scene(), fsCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2)); fsScene.add(quad);
+  const fsMat = (frag, uniforms, defines) => new THREE.ShaderMaterial({
+    vertexShader: VS, fragmentShader: frag, uniforms, ...(defines ? { defines } : {}), depthTest: false, depthWrite: false });
+  const runPass = (mat, target) => { quad.material = mat; renderer.setRenderTarget(target); renderer.render(fsScene, fsCam); };
+
+  const GLSL_HASH = `float hash12(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }`;
+
+  const U = {
+    size: new THREE.Vector2(1, 1),
+    dof: { tColor: { value: null }, tDepth: { value: null }, uRes: { value: new THREE.Vector2() }, uFocus: { value: 6 }, uAper: { value: 0.55 },
+      uMaxPx: { value: small ? 9 : 14 }, uNear: { value: 0.1 }, uFar: { value: 80 }, uMotion: { value: reduced ? 0 : 0.7 },
+      uInvVP: { value: new THREE.Matrix4() }, uPrevVP: { value: new THREE.Matrix4() } },
+    bright: { tColor: { value: null }, uTh: { value: 1.0 }, uPx: { value: new THREE.Vector2() } },
+    blur: { tColor: { value: null }, uDir: { value: new THREE.Vector2() } },
+    comp: { tColor: { value: null }, tBloom: { value: null }, tBright: { value: null }, uLight: { value: new THREE.Vector2(0.3, 0.8) },
+      uBloom: { value: 0.75 }, uRays: { value: 0.4 }, uFade: { value: 0 }, uTime: { value: 0 } },
+  };
+
+  const dofMat = fsMat(`
+    uniform sampler2D tColor, tDepth; uniform vec2 uRes; uniform float uFocus, uAper, uMaxPx, uNear, uFar, uMotion;
+    uniform mat4 uInvVP, uPrevVP; varying vec2 vUv;
+    float linZ(float d){ float z = d * 2.0 - 1.0; return 2.0 * uNear * uFar / (uFar + uNear - z * (uFar - uNear)); }
+    void main(){
+      float d = texture2D(tDepth, vUv).x;
+      float lz = linZ(d);
+      float coc = clamp(abs(lz - uFocus) / lz * uAper, 0.0, 1.0);
+      // movimento de câmera por pixel: reprojeta a posição de mundo no quadro anterior
+      vec4 w = uInvVP * vec4(vUv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); w /= w.w;
+      vec4 pp = uPrevVP * w; vec2 prev = pp.xy / pp.w * 0.5 + 0.5;
+      vec2 vel = (vUv - prev) * uMotion; float vl = length(vel);
+      vel *= min(vl, 0.05) / max(vl, 1e-5);
+      vec3 acc = vec3(0.0); float ws = 0.0;
+      for (int i = 0; i < TAPS; i++) {
+        float fi = (float(i) + 0.5) / float(TAPS);
+        float a = float(i) * 2.39996;
+        vec2 o = vec2(cos(a), sin(a)) * sqrt(fi) * coc * uMaxPx / uRes + vel * (fi - 0.5);
+        vec3 c = texture2D(tColor, vUv + o).rgb;
+        float l = dot(c, vec3(0.3, 0.59, 0.11));
+        float wt = 1.0 + l * l * 2.0;           // realça os discos de bokeh nas luzes
+        acc += c * wt; ws += wt;
+      }
+      gl_FragColor = vec4(acc / ws, 1.0);
+    }`, U.dof, { TAPS: q.taps });
+
+  const brightMat = fsMat(`
+    uniform sampler2D tColor; uniform float uTh; uniform vec2 uPx; varying vec2 vUv;
+    void main(){
+      vec3 c = (texture2D(tColor, vUv + uPx).rgb + texture2D(tColor, vUv - uPx).rgb
+              + texture2D(tColor, vUv + vec2(uPx.x, -uPx.y)).rgb + texture2D(tColor, vUv - vec2(uPx.x, -uPx.y)).rgb) * 0.25;
+      float l = max(max(c.r, c.g), c.b);
+      gl_FragColor = vec4(c * smoothstep(uTh, uTh + 0.8, l), 1.0);
+    }`, U.bright);
+
+  const blurMat = fsMat(`
+    uniform sampler2D tColor; uniform vec2 uDir; varying vec2 vUv;
+    void main(){
+      vec3 s = texture2D(tColor, vUv).rgb * 0.227;
+      vec2 o1 = uDir * 1.385, o2 = uDir * 3.231;
+      s += (texture2D(tColor, vUv + o1).rgb + texture2D(tColor, vUv - o1).rgb) * 0.316;
+      s += (texture2D(tColor, vUv + o2).rgb + texture2D(tColor, vUv - o2).rgb) * 0.070;
+      gl_FragColor = vec4(s, 1.0);
+    }`, U.blur);
+
+  const compMat = fsMat(`
+    uniform sampler2D tColor, tBloom, tBright; uniform vec2 uLight; uniform float uBloom, uRays, uFade, uTime; varying vec2 vUv;
+    ${GLSL_HASH}
+    vec3 aces(vec3 x){ return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+    void main(){
+      vec3 col = texture2D(tColor, vUv).rgb + texture2D(tBloom, vUv).rgb * uBloom;
+      if (uRays > 0.0) {                       // god rays em espaço de tela, a partir da fonte de luz
+        vec2 dl = (uLight - vUv) / float(RAYS) * 0.95, p = vUv; vec3 r = vec3(0.0); float il = 1.0;
+        for (int i = 0; i < RAYS; i++) { p += dl; r += texture2D(tBright, p).rgb * il; il *= 0.94; }
+        col += r * uRays * 3.0 / float(RAYS);
+      }
+      col *= 1.0 - uFade;
+      col = pow(aces(col), vec3(1.0 / 2.2));
+      col += (hash12(gl_FragCoord.xy + uTime) - 0.5) / 255.0;   // dither: evita faixas nos pretos
+      gl_FragColor = vec4(col, 1.0);
+    }`, U.comp, { RAYS: q.rays });
+
+  let R = {};
+  function makeRTs() {
+    Object.values(R).forEach((r) => r.dispose());
+    const w = Math.max(2, Math.floor(innerWidth * dpr * q.scale)), h = Math.max(2, Math.floor(innerHeight * dpr * q.scale));
+    const o = { type: hdr ? THREE.HalfFloatType : THREE.UnsignedByteType, format: THREE.RGBAFormat,
+      minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, stencilBuffer: false };
+    const flat = { ...o, depthBuffer: false };
+    R = {}; U.bright.uTh.value = hdr ? 1.0 : 0.6;
+    R.scene = new THREE.WebGLRenderTarget(w, h, o);
+    R.scene.depthTexture = new THREE.DepthTexture(w, h, THREE.UnsignedIntType);
+    R.dof = new THREE.WebGLRenderTarget(w, h, flat);
+    const bw = Math.max(2, w >> 2), bh = Math.max(2, h >> 2);
+    R.bright = new THREE.WebGLRenderTarget(bw, bh, flat);
+    R.blurA = new THREE.WebGLRenderTarget(bw, bh, flat);
+    R.blurB = new THREE.WebGLRenderTarget(bw, bh, flat);
+    R.refl = new THREE.WebGLRenderTarget(Math.max(2, Math.floor(w * q.refl)), Math.max(2, Math.floor(h * q.refl)), o);
+    U.size.set(w, h); U.dof.uRes.value.set(w, h); U.bright.uPx.value.set(1 / w, 1 / h);
+  }
+
+  /* ---------- 3. Cena ---------- */
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000000);
+  scene.fog = new THREE.Fog(0x000000, 9, 34);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80);
+  const lin = (h) => new THREE.Color(h).convertSRGBToLinear();
+  const PAL = { dark: lin('#1c0208'), mid: lin('#6e0b1f'), light: lin('#b3263f') };
+  const T = { value: 0 };                       // tempo compartilhado
+  const WIND = { value: new THREE.Vector2() };  // vento atual (x, z)
+
+  // Luz
+  scene.add(new THREE.AmbientLight(0xffffff, 0.03));
+  const key = new THREE.SpotLight(0xffc2c8, 1.7, 0, 0.55, 1); key.position.set(-4, 6, 5); scene.add(key);
+  const rim = new THREE.PointLight(0x9b1030, 1.3); rim.position.set(4, 1, -4); scene.add(rim);
+  (function environment() {
+    const env = new THREE.Scene();
+    const panel = (hex, k, pos, w, h) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(hex).multiplyScalar(k), side: THREE.DoubleSide }));
+      m.position.set(...pos); m.lookAt(0, 0, 0); env.add(m);
+    };
+    panel(0xff3b5c, 2.2, [-5, 3, 3], 8, 3); panel(0xffd9c9, 1.2, [5, -2, -3], 6, 2); panel(0x2a0208, 0.5, [0, 6, -4], 10, 4);
+    const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(env, 0.04).texture; pm.dispose();
+  })();
+
+  // Fonte de luz distante (origem dos god rays) + facho volumétrico
+  const moon = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), new THREE.ShaderMaterial({
+    uniforms: { uI: { value: 2 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform float uI; varying vec2 vUv; void main(){ float d = length(vUv - 0.5) * 2.0; float g = exp(-d * d * 5.0); gl_FragColor = vec4(vec3(1.0, 0.72, 0.76) * g * uI, g); }' }));
+  moon.position.set(-6, 7, -14); moon.renderOrder = -1; scene.add(moon);
+
+  const shaftU = { uTime: T, uI: { value: 0.12 } };
+  const shaft = new THREE.Mesh(new THREE.ConeGeometry(4.2, 21, 48, 1, true).translate(0, -10.5, 0).rotateX(-Math.PI / 2), new THREE.ShaderMaterial({
+    uniforms: shaftU, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    vertexShader: `varying vec3 vN, vV; varying float vH;
+      void main(){ vH = uv.y; vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position, 1.0); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `uniform float uTime, uI; varying vec3 vN, vV; varying float vH;
+      void main(){ float f = pow(abs(dot(normalize(vN), normalize(vV))), 2.0);
+        gl_FragColor = vec4(vec3(1.0, 0.32, 0.42), f * pow(vH, 1.2) * uI * (0.85 + 0.15 * sin(uTime * 0.35))); }` }));
+  shaft.renderOrder = 2; scene.add(shaft);
+
+  // Pétala base (plano deformado). cup/curl = 0 quando a forma é animada no shader.
+  const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const lcg = (seed) => { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); };
+  const SEG = small ? [12, 16] : [16, 22];
+  function petalGeometry({ cup = 0, curl = 0, ruffle = 0.04, seed = 1 } = {}) {
+    const g = new THREE.PlaneGeometry(1, 1, SEG[0], SEG[1]);
+    const p = g.attributes.position, col = new Float32Array(p.count * 3), c = new THREE.Color();
+    for (let i = 0; i < p.count; i++) {
+      const u = p.getX(i) * 2, v = p.getY(i) + 0.5;
+      const w = v < 0.6 ? 0.3 + 0.7 * sstep(0, 0.6, v) : Math.sqrt(Math.max(0, 1 - ((v - 0.6) / 0.4) ** 2));
+      const x = u * w * 0.5;
+      p.setXYZ(i, x, v, cup * x * x * 2 - curl * 0.5 * v ** 3 + ruffle * Math.sin(u * 7 + seed * 3.1) * v ** 3 * Math.abs(u));
+      c.copy(PAL.dark).lerp(PAL.mid, sstep(0, 0.65, v)).lerp(PAL.light, 0.4 * v ** 3 * (0.4 + 0.6 * Math.abs(u)));
+      col.set([c.r, c.g, c.b], i * 3);
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    g.computeVertexNormals();
+    return g;
+  }
+
+  // Rosa: pétalas em espiral áurea numa única geometria; a posição de cada pétala (aP) é resolvida no vertex shader.
+  function buildRose(petals, seed) {
+    const rnd = lcg(seed), geos = [], meta = [];
+    for (let i = 0; i < petals; i++) {
+      const t = i / (petals - 1);
+      geos.push(petalGeometry({ ruffle: 0.02 + 0.07 * t, seed: i }));
+      meta.push([t, i * 2.39996 + rnd() * 0.15, rnd()]);
+    }
+    let vc = 0, ic = 0; geos.forEach((g) => { vc += g.attributes.position.count; ic += g.index.count; });
+    const pos = new Float32Array(vc * 3), nor = new Float32Array(vc * 3), col = new Float32Array(vc * 3), ap = new Float32Array(vc * 3), idx = new Uint32Array(ic);
+    let vo = 0, io = 0;
+    geos.forEach((g, k) => {
+      const n = g.attributes.position.count;
+      pos.set(g.attributes.position.array, vo * 3); nor.set(g.attributes.normal.array, vo * 3); col.set(g.attributes.color.array, vo * 3);
+      for (let i = 0; i < n; i++) ap.set(meta[k], (vo + i) * 3);
+      for (let i = 0; i < g.index.count; i++) idx[io + i] = g.index.array[i] + vo;
+      vo += n; io += g.index.count; g.dispose();
+    });
+    const m = new THREE.BufferGeometry();
+    m.setAttribute('position', new THREE.BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    m.setAttribute('color', new THREE.BufferAttribute(col, 3)); m.setAttribute('aP', new THREE.BufferAttribute(ap, 3));
+    m.setIndex(new THREE.BufferAttribute(idx, 1));
+    return m;
+  }
+
+  // Material da rosa: abertura, esvoaçar, dissolução em brasas e gotas de água, tudo injetado no MeshPhysicalMaterial.
+  function roseMaterial(open) {
+    const u = { uOpen: { value: open }, uFlutter: { value: 1 }, uDissolve: { value: 0 }, uTime: T };
+    const m = new THREE.MeshPhysicalMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.5, sheen: new THREE.Color(0xff3355),
+      clearcoat: 0.15, clearcoatRoughness: 0.6, emissive: lin('#240008'), emissiveIntensity: 0.6 });
+    m.customProgramCacheKey = () => 'rose-v2';
+    m.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, u);
+      sh.vertexShader = sh.vertexShader
+        .replace('void main() {', `
+          attribute vec3 aP; uniform float uOpen, uFlutter, uDissolve, uTime; varying vec2 vP; varying float vRnd;
+          mat3 rotY(float a){ float c = cos(a), s = sin(a); return mat3(c, 0.0, -s, 0.0, 1.0, 0.0, s, 0.0, c); }
+          mat3 rotZ(float a){ float c = cos(a), s = sin(a); return mat3(c, s, 0.0, -s, c, 0.0, 0.0, 0.0, 1.0); }
+          void main() {`)
+        .replace('#include <beginnormal_vertex>', `
+          float t = aP.x, ang = aP.y, rnd = aP.z;
+          float o = clamp(uOpen * 1.8 - (1.0 - t) * 0.8, 0.0, 1.0); o = o * o * (3.0 - 2.0 * o);   // pétalas externas abrem primeiro
+          float tilt = mix(0.04 + 0.12 * pow(t, 1.5), 0.35 + 0.95 * pow(t, 1.2) + (rnd - 0.5) * 0.16, o);
+          float rad = (0.015 + 0.34 * pow(t, 0.9)) * mix(0.85, 1.0, o);
+          float sc = 0.32 + 0.62 * pow(t, 0.8);
+          float cup = mix(2.4 - t * 0.5, 1.5 - t * 0.9, o);
+          float curl = 0.1 + t * o;
+          float xx = position.x, vv = position.y;
+          float flut = sin(uTime * 1.7 + rnd * 6.28 + vv * 3.0) * 0.035 * uFlutter * vv * vv * (0.3 + o);
+          vec3 lp = vec3(xx, vv, cup * xx * xx * 2.0 - curl * 0.5 * vv * vv * vv + position.z + flut);
+          vec3 ln = normalize(vec3(-4.0 * cup * xx, 1.5 * curl * vv * vv, 1.0));
+          mat3 RM = rotY(ang) * rotZ(-tilt) * rotY(-1.5707963);
+          vec3 objectNormal = RM * ln;`)
+        .replace('#include <begin_vertex>', `
+          vec3 transformed = rotY(ang) * vec3(rad, 0.04 * (1.0 - t), 0.0) + RM * (vec3(sc * 0.9, sc, sc) * lp);
+          float dd = smoothstep(0.0, 1.0, uDissolve * 1.4 - rnd * 0.3);
+          transformed += (normalize(vec3(cos(ang), 0.8, sin(ang))) * 1.2 + vec3(0.0, rnd, 0.0)) * dd * dd * 0.8;
+          vP = position.xy + vec2(rnd * 13.0, t * 7.0); vRnd = rnd;`);
+      sh.fragmentShader = sh.fragmentShader
+        .replace('void main() {', `
+          uniform float uDissolve; varying vec2 vP; varying float vRnd;
+          ${GLSL_HASH}
+          float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+            return mix(mix(hash12(i), hash12(i + vec2(1, 0)), f.x), mix(hash12(i + vec2(0, 1)), hash12(i + vec2(1, 1)), f.x), f.y); }
+          float drops(vec2 p, out vec2 dir){            // gotas: uma por célula, aleatórias e esparsas
+            vec2 g = floor(p * 9.0), f = fract(p * 9.0) - 0.5; dir = vec2(0.0);
+            if (hash12(g) > 0.28) return 0.0;
+            vec2 d = f - (vec2(hash12(g + 3.1), hash12(g + 7.7)) - 0.5) * 0.45;
+            float r = 0.09 + 0.1 * hash12(g + 1.3);
+            dir = d / r; return smoothstep(r, r * 0.55, length(d)); }
+          void main() {`)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          vec2 dgrad; float dm = drops(vP, dgrad);
+          diffuseColor.rgb *= 1.0 - 0.3 * dm;
+          float thr = uDissolve * 1.5 - vRnd * 0.35 - 0.05, nz = vnoise(vP * 5.0), edge = 0.0;
+          if (uDissolve > 0.001) { if (nz < thr) discard; edge = 1.0 - smoothstep(thr, thr + 0.12, nz); }`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+          roughnessFactor = mix(roughnessFactor, 0.05, dm);`)
+        .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+          totalEmissiveRadiance += vec3(1.0, 0.95, 0.92) * dm * smoothstep(0.3, 0.95, dot(normalize(dgrad + 1e-4), vec2(-0.6, 0.8))) * 1.4;
+          totalEmissiveRadiance += vec3(1.0, 0.38, 0.3) * edge * 3.0;`);
+    };
+    m.userData.u = u; return m;
+  }
+
+  // Rosas flutuantes
+  const GEO = [buildRose(small ? 20 : 26, 3), buildRose(small ? 26 : 34, 7), buildRose(small ? 32 : 42, 11)];
+  const ROSES = [
+    { p: [0, 0.5, 0], s: 1.25, r: [1.0, 0, 0.08], v: 1, open: 0.04, spin: 0.05, bob: 0 },        // principal
+    { p: [-3.4, 1.6, -3.2], s: 1.0, r: [0.7, 0, -0.5], v: 2, open: 0.9, spin: -0.04, bob: 1.3 },
+    { p: [3.6, 1.0, -4.5], s: 1.1, r: [0.5, 0, 0.6], v: 0, open: 0.3, spin: 0.03, bob: 2.1 },
+    { p: [-5.5, 0.4, -7], s: 1.4, r: [0.9, 0, 0.3], v: 1, open: 0.7, spin: 0.02, bob: 3.4 },
+    { p: [5.8, 0.2, -8.5], s: 1.5, r: [0.6, 0, -0.4], v: 2, open: 1.0, spin: -0.03, bob: 4.2 },
+    { p: [0.8, 2.8, -9], s: 1.3, r: [0.4, 0, 0.2], v: 0, open: 0.2, spin: 0.02, bob: 5.0 },
+    { p: [-1.6, -0.1, -5.5], s: 0.9, r: [1.1, 0, -0.2], v: 2, open: 0.85, spin: 0.04, bob: 0.7 },
+    { p: [2.7, -0.2, 1.5], s: 0.8, r: [0.8, 0, 0.5], v: 1, open: 0.5, spin: -0.05, bob: 2.7 },     // primeiro plano
+    { p: [-3.0, 0.2, 1.2], s: 0.55, r: [0.6, 0, -0.7], v: 0, open: 0.35, spin: 0.05, bob: 1.9 },   // primeiro plano
+  ].slice(0, small ? 7 : 9);
+  const roses = ROSES.map((it, i) => {
+    const group = new THREE.Group(), mat = roseMaterial(it.open);
+    group.position.set(...it.p); group.scale.setScalar(it.s); group.rotation.set(...it.r);
+    const mesh = new THREE.Mesh(GEO[it.v], mat); mesh.position.y = -0.35; group.add(mesh); scene.add(group);
+    return { group, mesh, mat, it, i };
+  });
+  const hero = roses[0];
+
+  // Pétalas soltas com física suave: arrasto, vento, flutuação, pouso no chão e desaparecimento.
+  const NP = reduced ? 40 : small ? 55 : 110;
+  const petalMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, side: THREE.DoubleSide, roughness: 0.5, sheen: new THREE.Color(0xff3355),
+    clearcoat: 0.15, emissive: lin('#240008'), emissiveIntensity: 0.6 });
+  const fall = new THREE.InstancedMesh(petalGeometry({ cup: 1.2, curl: 0.6, ruffle: 0.03, seed: 2 }).scale(0.2, 0.25, 0.2).translate(0, -0.12, 0), petalMat, NP);
+  fall.frustumCulled = false; scene.add(fall);
+  const spawn = (p, fresh) => {
+    p.x = (Math.random() - 0.5) * 16; p.z = -8 + Math.random() * 11; p.y = fresh ? FLOOR + 0.5 + Math.random() * 6 : 6.5;
+    p.vx = p.vy = p.vz = 0; p.rest = 0; p.size = 0.7 + Math.random() * 0.6;
+    p.fall = 0.14 + Math.random() * 0.14; p.w = 0.5 + Math.random() * 0.7; p.ph = Math.random() * 6.28;
+  };
+  const pet = Array.from({ length: NP }, (_, i) => { const p = {}; spawn(p, true); const b = 0.6 + Math.random() * 0.9; fall.setColorAt(i, new THREE.Color(b, b * 0.9, b * 0.9)); return p; });
+  const dummy = new THREE.Object3D();
+
+  // Vaga-lumes e poeira de luz (bokeh calculado no próprio ponto, pela distância ao foco)
+  const NF = reduced ? 220 : small ? 260 : 650;
+  const fpos = new Float32Array(NF * 3), fseed = new Float32Array(NF);
+  for (let i = 0; i < NF; i++) { fpos.set([(Math.random() - 0.5) * 20, FLOOR + 0.2 + Math.random() * 6, -10 + Math.random() * 15], i * 3); fseed[i] = Math.random(); }
+  const ptsVS = `
+    uniform float uTime, uPx, uFocus, uBoost; uniform vec2 uWind; attribute float aSeed; varying float vA; varying float vC;
+    void main(){
+      float ff = step(aSeed, 0.16);              // ~16% são vaga-lumes; o resto, poeira
+      float k = mix(0.25, 1.0, ff);
+      vec3 p = position;
+      p += vec3(sin(uTime * (0.1 + aSeed * 0.2) + aSeed * 40.0) * 1.3, sin(uTime * (0.12 + aSeed * 0.15) + aSeed * 25.0) * 0.8, cos(uTime * (0.09 + aSeed * 0.2) + aSeed * 17.0) * 1.3) * k;
+      p.xz += uWind * (0.3 + aSeed) * 0.6 * sin(uTime * 0.4 + aSeed * 9.0);
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      float dist = max(-mv.z, 0.5);
+      float coc = clamp(abs(dist - uFocus) / dist, 0.0, 1.2);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = uPx * mix(0.7, 2.2, ff) * (1.0 + coc * 3.5) * (6.0 / dist);
+      float blink = mix(0.35 + 0.65 * pow(0.5 + 0.5 * sin(uTime * (0.5 + aSeed) + aSeed * 40.0), 3.0), pow(max(sin(uTime * (0.7 + aSeed * 0.8) + aSeed * 50.0), 0.0), 5.0), ff);
+      vA = blink * mix(0.5, 1.0 + 2.2 * uBoost, ff) / (1.0 + coc * coc * 5.0);
+      vC = coc;
+    }`;
+  const ptsFS = `
+    varying float vA; varying float vC;
+    void main(){
+      float d = length(gl_PointCoord - 0.5) * 2.0;
+      float core = smoothstep(1.0, 0.0, d); core *= core;
+      float disc = smoothstep(1.0, 0.85, d) * (0.55 + 0.45 * smoothstep(0.5, 0.95, d));   // disco de bokeh com borda
+      float a = mix(core, disc * 0.6, clamp(vC * 1.5, 0.0, 1.0));
+      gl_FragColor = vec4(vec3(1.0, 0.6, 0.45) * 1.4, a * vA);
+    }`;
+  const FU = { uTime: T, uPx: { value: 12 }, uFocus: { value: 6 }, uBoost: { value: 0 }, uWind: WIND };
+  const fgeo = new THREE.BufferGeometry();
+  fgeo.setAttribute('position', new THREE.BufferAttribute(fpos, 3)); fgeo.setAttribute('aSeed', new THREE.BufferAttribute(fseed, 1));
+  const flies = new THREE.Points(fgeo, new THREE.ShaderMaterial({ uniforms: FU, vertexShader: ptsVS, fragmentShader: ptsFS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  flies.frustumCulled = false; scene.add(flies);
+
+  // Brasas: a rosa principal se desfaz em partículas luminosas
+  const NE = small ? 140 : 300;
+  const epos = new Float32Array(NE * 3), eseed = new Float32Array(NE);
+  for (let i = 0; i < NE; i++) {
+    const r = 0.25 + Math.random() * 0.6, a = Math.random() * 6.28, h = (Math.random() - 0.3) * 0.9;
+    epos.set([Math.cos(a) * r, h, Math.sin(a) * r], i * 3); eseed[i] = Math.random();
+  }
+  const egeo = new THREE.BufferGeometry();
+  egeo.setAttribute('position', new THREE.BufferAttribute(epos, 3)); egeo.setAttribute('aSeed', new THREE.BufferAttribute(eseed, 1));
+  const EU = { uTime: T, uPx: { value: 12 }, uFocus: { value: 6 }, uDissolve: { value: 0 }, uCenter: { value: new THREE.Vector3() } };
+  const embers = new THREE.Points(egeo, new THREE.ShaderMaterial({ uniforms: EU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `uniform float uTime, uPx, uFocus, uDissolve; uniform vec3 uCenter; attribute float aSeed; varying float vA; varying float vC;
+      void main(){
+        float pr = clamp(uDissolve * 1.5 - aSeed * 0.5, 0.0, 1.0);
+        vec3 p = uCenter + position * 1.2;
+        p += vec3(sin(aSeed * 40.0 + uTime * 0.3) * 0.9, 0.6 + aSeed * 2.0, cos(aSeed * 30.0 + uTime * 0.25) * 0.9) * pr * pr * 2.2;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        float dist = max(-mv.z, 0.5); float coc = clamp(abs(dist - uFocus) / dist, 0.0, 1.2);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = uPx * (1.0 + aSeed * 1.4) * (1.0 + coc * 3.0) * (6.0 / dist);
+        vA = pow(sin(pr * 3.14159), 0.8) * 1.8 / (1.0 + coc * coc * 5.0); vC = coc;
+      }`, fragmentShader: ptsFS }));
+  embers.frustumCulled = false; scene.add(embers);
+
+  // Chão preto espelhado: reflexo planar (câmera refletida), levemente borrado e com fresnel.
+  const floorU = { tRefl: { value: null }, uSize: { value: U.size }, uTime: T, uI: { value: 0.55 }, uCam: { value: new THREE.Vector3() } };
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(70, 70).rotateX(-Math.PI / 2), new THREE.ShaderMaterial({
+    uniforms: floorU, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform sampler2D tRefl; uniform vec2 uSize; uniform float uTime, uI; uniform vec3 uCam; varying vec3 vW;
+      void main(){
+        vec2 uv = gl_FragCoord.xy / uSize;
+        uv += vec2(sin(vW.x * 2.5 + uTime * 0.4) + sin(vW.z * 1.7 - uTime * 0.3), cos(vW.z * 2.1 + uTime * 0.35)) * 0.0012;
+        vec3 v = normalize(uCam - vW);
+        float fr = 0.14 + 0.86 * pow(1.0 - clamp(v.y, 0.0, 1.0), 3.0);
+        vec3 r = vec3(0.0); float px = 1.5 / uSize.y;
+        for (int i = -2; i <= 2; i++) r += texture2D(tRefl, uv + vec2(0.0, float(i) * px * 2.0)).rgb;
+        r /= 5.0;
+        float fade = smoothstep(16.0, 3.0, length(vW.xz - vec2(0.0, -3.0)));
+        gl_FragColor = vec4(r * fr * uI * fade, 1.0);
+      }` }));
+  floor.position.y = FLOOR; floor.renderOrder = 1; scene.add(floor);
+  const refCam = new THREE.PerspectiveCamera(); refCam.matrixAutoUpdate = false;
+  const MIRROR = new THREE.Matrix4().set(1, 0, 0, 0, 0, -1, 0, 2 * FLOOR, 0, 0, 1, 0, 0, 0, 0, 1);
+
+  /* ---------- 4. Estado do ambiente (animado pelo GSAP) e vento ---------- */
+  const windAt = (t) => {
+    const g = E.wind * (0.55 + 0.45 * Math.sin(t * 0.37) * Math.sin(t * 0.11 + 1)) + W.gust * E.wind * 2.2;
+    WIND.value.set(g * (1 + 0.3 * Math.sin(t * 0.7)), 0.35 * g * Math.sin(t * 0.23));
+  };
+
+  /* ---------- 5. Loop ---------- */
+  let rtTimer = 0;
+  function resize(now) {
+    renderer.setSize(innerWidth, innerHeight, false);
+    camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+    if (lite) return;
+    clearTimeout(rtTimer);
+    const run = () => { try { makeRTs(); } catch (e) { console.warn(e); enableLite(); } };
+    if (now === true) run(); else rtTimer = setTimeout(run, 150);
+  }
+  addEventListener('resize', () => resize()); resize(true);
+  const ptr = { x: 0, y: 0, sx: 0, sy: 0 };
+  addEventListener('pointermove', (e) => { ptr.x = (e.clientX / innerWidth) * 2 - 1; ptr.y = -((e.clientY / innerHeight) * 2 - 1); });
+
+  const clock = new THREE.Clock(), look = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const VP = new THREE.Matrix4(), prevVP = new THREE.Matrix4(); let firstFrame = true;
+  let acc = 0, frames = 0, downgrades = 0;
+  const setPx = (h) => { FU.uPx.value = EU.uPx.value = (h / 900) * 12; };
+
+  const frame = () => {
+    const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime; T.value = t;
+    windAt(t);
+    const par = reduced ? 0.25 : 1, drift = reduced ? 0 : 1;
+
+    // câmera: GSAP define a pose; ponteiro dá parallax; respiração lenta por cima
+    const k = (1 - Math.pow(0.001, dt)) * 0.6;
+    ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
+    const asp = innerWidth / innerHeight, zf = asp < 0.8 ? 1 + (0.8 - asp) * 1.2 : 1;
+    camera.position.set(E.camX + ptr.sx * 0.9 * par + Math.sin(t * 0.12) * 0.22 * drift, E.camY + ptr.sy * 0.5 * par + Math.sin(t * 0.09) * 0.1 * drift, E.camZ * zf);
+    look.set(E.camX * 0.3 - ptr.sx * 0.15 * par, E.lookY, 0); camera.lookAt(look); camera.updateMatrixWorld();
+
+    // rosas flutuantes: oscilação orgânica + resposta ao vento
+    const wx = WIND.value.x;
+    roses.forEach(({ group, mesh, mat, it, i }) => {
+      const m = drift * 0.9 + 0.1;
+      group.position.y = it.p[1] + (Math.sin(t * 0.3 + it.bob) * 0.12 + Math.sin(t * 0.47 + it.bob * 2) * 0.05) * m;
+      group.rotation.x = it.r[0] + (Math.sin(t * 0.21 + it.bob) * 0.07) * m;
+      group.rotation.z = it.r[2] + (Math.sin(t * 0.17 + it.bob * 1.7) * 0.09 - wx * 0.07 * (0.6 + 0.4 * Math.sin(t * 0.9 + it.bob))) * m;
+      mesh.rotation.y += dt * it.spin * (0.4 + wx * 0.6) * m;
+      const u = mat.userData.u;
+      u.uOpen.value = i === 0 ? E.heroOpen : it.open + Math.sin(t * 0.25 + it.bob) * 0.03;
+      u.uFlutter.value = E.flutter * (0.6 + wx);
+      u.uDissolve.value = Math.min(1, Math.max(0, E.dissolve * 1.5 - i * 0.09));
+    });
+    EU.uDissolve.value = hero.mat.userData.u.uDissolve.value;
+    EU.uCenter.value.set(hero.group.position.x, hero.group.position.y + 0.1, hero.group.position.z);
+
+    // pétalas soltas
+    const ex = Math.exp(-dt * 1.6);
+    pet.forEach((p, i) => {
+      if (p.rest > 0) {
+        p.rest -= dt; dummy.position.set(p.x, FLOOR + 0.012, p.z);
+        dummy.rotation.set(-1.5708 + p.lx, p.ly, 0); dummy.scale.setScalar(p.size * Math.min(1, p.rest / 1.5));
+        if (p.rest <= 0) spawn(p, false);
+      } else {
+        const tx = WIND.value.x * 1.3 + Math.sin(t * 0.6 + p.y * 0.7 + p.ph) * 0.35 * (0.4 + wx);
+        const tz = WIND.value.y + Math.cos(t * 0.5 + p.x * 0.6) * 0.25;
+        const ty = -p.fall * (1 - 0.6 * Math.abs(Math.sin(t * 1.3 + p.ph)));
+        p.vx += (tx - p.vx) * (1 - ex); p.vy += (ty - p.vy) * (1 - ex); p.vz += (tz - p.vz) * (1 - ex);
+        p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+        if (p.x > 9) p.x = -9; else if (p.x < -9) p.x = 9;
+        if (p.y <= FLOOR + 0.012) { p.rest = 6 + Math.random() * 8; p.lx = (Math.random() - 0.5) * 0.25; p.ly = Math.random() * 6.28; }
+        const s = t * p.w + p.ph;
+        dummy.position.set(p.x, p.y, p.z);
+        dummy.rotation.set(Math.sin(s) * 1.1 + p.vx * 0.5, p.ph + s * 0.6, Math.cos(s * 0.8) * 0.9);
+        dummy.scale.setScalar(p.size);
+      }
+      dummy.updateMatrix(); fall.setMatrixAt(i, dummy.matrix);
+    });
+    fall.instanceMatrix.needsUpdate = true;
+
+    // luz: lua distante, facho, key
+    moon.position.set(moonPos.x, moonPos.y, moonPos.z); key.color.setRGB(keyColor.r, keyColor.g, keyColor.b);
+    moon.quaternion.copy(camera.quaternion); moon.material.uniforms.uI.value = E.moonI;
+    shaft.position.copy(moon.position); shaft.lookAt(0, -0.4, 4); shaftU.uI.value = 0.1 + E.rays * 0.12;
+    key.intensity = E.keyI;
+    FU.uBoost.value = E.boost; floorU.uI.value = E.floorI;
+
+    // foco: distância da câmera à rosa principal
+    tmp.copy(hero.group.position).applyMatrix4(camera.matrixWorldInverse);
+    const focus = Math.max(1, -tmp.z); U.dof.uFocus.value += (focus - U.dof.uFocus.value) * Math.min(1, dt * 3);
+    FU.uFocus.value = EU.uFocus.value = U.dof.uFocus.value;
+
+    // --- renderização ---
+    floorU.uCam.value.copy(camera.position);
+    if (lite) {
+      floor.visible = false; setPx(innerHeight * dpr);
+      renderer.setRenderTarget(null); renderer.render(scene, camera);
+    } else {
+    if (q.reflOn) {                             // reflexo planar
+      floor.visible = false; setPx(R.refl.height);
+      refCam.projectionMatrix.copy(camera.projectionMatrix); refCam.projectionMatrixInverse.copy(camera.projectionMatrixInverse);
+      refCam.matrixWorld.copy(MIRROR).multiply(camera.matrixWorld); refCam.matrixWorldInverse.copy(refCam.matrixWorld).invert();
+      renderer.setRenderTarget(R.refl); renderer.render(scene, refCam); floor.visible = true;
+    }
+    floorU.tRefl.value = R.refl.texture;
+    setPx(R.scene.height);
+    renderer.setRenderTarget(R.scene); renderer.render(scene, camera);
+
+    VP.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    if (firstFrame) { prevVP.copy(VP); firstFrame = false; }
+    U.dof.tColor.value = R.scene.texture; U.dof.tDepth.value = R.scene.depthTexture;
+    U.dof.uInvVP.value.copy(VP).invert(); U.dof.uPrevVP.value.copy(prevVP);
+    runPass(dofMat, R.dof); prevVP.copy(VP);
+
+    U.bright.tColor.value = R.dof.texture; runPass(brightMat, R.bright);    // bloom: extrai, borra duas vezes
+    const bw = 1 / R.blurA.width, bh = 1 / R.blurA.height;
+    const blur = (src, dst, dx, dy) => { U.blur.tColor.value = src.texture; U.blur.uDir.value.set(dx, dy); runPass(blurMat, dst); };
+    blur(R.bright, R.blurA, bw, 0); blur(R.blurA, R.blurB, 0, bh); blur(R.blurB, R.blurA, bw * 2, 0); blur(R.blurA, R.blurB, 0, bh * 2);
+
+    const lp = moon.position.clone().project(camera);
+    U.comp.uLight.value.set(lp.x * 0.5 + 0.5, lp.y * 0.5 + 0.5);
+    U.comp.uRays.value = lp.z < 1 ? E.rays : 0;
+    U.comp.uBloom.value = E.bloom; U.comp.uFade.value = E.fade; U.comp.uTime.value = t;
+    U.comp.tColor.value = R.dof.texture; U.comp.tBloom.value = R.blurB.texture; U.comp.tBright.value = R.bright.texture;
+    runPass(compMat, null);
+    }
+
+    // qualidade adaptativa: reduz a escala interna se o quadro ficar lento
+    acc += dt; frames++;
+    if (acc > 2.5) {
+      const ms = (acc / frames) * 1000; acc = 0; frames = 0;
+      if (!lite && ms > 26 && downgrades < 3) {
+        downgrades++;
+        if (q.scale > 0.6) q.scale = Math.max(0.6, q.scale - 0.15); else q.reflOn = false;
+        try { makeRTs(); } catch (e) { enableLite(); }
+      }
+    }
+  };
+  renderer.setAnimationLoop(() => {
+    try { frame(); }
+    catch (err) { console.error(err); if (!lite) enableLite(); }   // se o pipeline avançado falhar, cai para o render direto
+  });
+  }  // fim de start3D
+
+  /* ---------- 6. Interface, poemas e jornada ---------- */
+  const title = document.getElementById('title'), btn = document.getElementById('enter');
+  const poemEl = document.getElementById('poem'), nextBtn = document.getElementById('next');
+  title.innerHTML = title.textContent.trim().split(' ').map((w) =>
+    `<span class="word" aria-hidden="true">${[...w].map((c) => `<span class="ch">${c}</span>`).join('')}</span>`).join(' ');
+
+  // abertura
+  gsap.to(E, { camZ: 8.2, camY: 0.15, lookY: 0.15, duration: D(9), ease: 'power3.out' });
+  gsap.fromTo('.ch', { opacity: 0, filter: 'blur(14px)', y: 10 }, { opacity: 0.92, filter: 'blur(0px)', y: 0, duration: D(2.2), delay: D(3.2), stagger: reduced ? 0 : 0.07, ease: 'power3.out' });
+  gsap.to(btn, { opacity: 0.85, duration: D(1.4), delay: D(6.2), onStart: () => { btn.disabled = false; } });
+
+  // espera que pode ser interrompida pelo visitante (toque, clique ou tecla)
+  let skipFn = null;
+  const waitOrSkip = (s) => new Promise((res) => {
+    const call = gsap.delayedCall(s, done);
+    function done() { call.kill(); skipFn = null; res(); }
+    skipFn = done;
+  });
+  const skip = () => { if (skipFn) skipFn(); };
+  addEventListener('keydown', (e) => { if (['Enter', ' ', 'ArrowRight'].includes(e.key) && e.target === document.body && skipFn) { e.preventDefault(); skip(); } });
+  addEventListener('pointerdown', (e) => { if (!e.target.closest('button')) skip(); });
+  nextBtn.addEventListener('click', skip);
+
+  const setBtn = (label, on) => gsap.to(btn, { opacity: 0, duration: D(0.5), onComplete: () => {
+    btn.textContent = label; btn.disabled = !on; if (on) gsap.to(btn, { opacity: 0.85, duration: D(1.4) }); } });
+
+  async function showPoem(lines, final) {
+    poemEl.classList.toggle('final', !!final);
+    poemEl.innerHTML = lines.map((l) => `<p class="ln">${l}</p>`).join('');
+    const els = poemEl.querySelectorAll('.ln');
+    const tl = gsap.fromTo(els, { opacity: 0, y: reduced ? 0 : 14, filter: reduced ? 'none' : 'blur(10px)' },
+      { opacity: 1, y: 0, filter: reduced ? 'none' : 'blur(0px)', duration: D(1.9), stagger: D(1.15), ease: 'power2.out' });
+    await waitOrSkip(D(1.9 + 1.15 * (els.length - 1)) + 3 + els.length * 0.5);   // tempo de leitura
+    tl.kill();
+    await gsap.to(els, { opacity: 0, filter: reduced ? 'none' : 'blur(8px)', duration: D(1.6), ease: 'power2.in' });
+  }
+
+  // transição cinematográfica: escurece, a câmera e a luz mudam de ambiente, a luz volta
+  function transition(env, extra = {}) {
+    const tl = gsap.timeline();
+    tl.to(E, { fade: 1, bloom: 1.3, duration: D(1.6), ease: 'power2.in' }, 0)
+      .to(E, { ...env, duration: D(4.2), ease: 'power2.inOut' }, 0)
+      .to(E, { fade: 0, bloom: 0.75, duration: D(2.2), ease: 'power2.out' }, D(2.1));
+    if (extra.key) tl.to(keyColor, { ...extra.key, duration: D(4) }, 0);
+    if (extra.moon) tl.to(moonPos, { ...extra.moon, duration: D(4.2), ease: 'power2.inOut' }, 0);
+    return tl.then ? new Promise((r) => tl.eventCallback('onComplete', r)) : Promise.resolve();
+  }
+
+  let running = false;
+  async function journey() {
+    running = true; nextBtn.classList.add('on');
+    gsap.to(title, { opacity: 0, filter: 'blur(10px)', duration: D(2.2), ease: 'power2.inOut' });
+    setBtn('', false);
+
+    // I — a rosa se abre, aproximação suave
+    gsap.to(E, { camZ: 5.0, camY: 0.55, lookY: 0.4, wind: 0.45, duration: D(6.5), ease: 'power3.inOut', overwrite: 'auto' });
+    gsap.to(E, { heroOpen: 1, duration: D(30), ease: 'sine.inOut' });
+    await waitOrSkip(D(3));
+    for (const p of POEMS[0]) await showPoem(p);
+
+    // II — vento
+    const kc = rgb(0xff9aa8);
+    await transition({ camX: -0.8, camY: 0.15, camZ: 7.2, lookY: 0.15, wind: 1.0, flutter: 2, rays: 0.5 }, { key: { r: kc.r, g: kc.g, b: kc.b }, moon: { x: 5, y: 5, z: -14 } });
+    for (const p of POEMS[1]) await showPoem(p);
+
+    // III — a rosa se dissolve em luz sobre o chão espelhado
+    const kd = rgb(0xffb3bc);
+    await transition({ camX: 0, camY: -0.1, camZ: 6.2, lookY: -0.15, wind: 0.5, flutter: 1, rays: 0.6, floorI: 0.95, moonI: 3 }, { key: { r: kd.r, g: kd.g, b: kd.b }, moon: { x: 0, y: 4, z: -15 } });
+    gsap.to(E, { dissolve: 1, duration: D(34), ease: 'sine.inOut', delay: D(2) });
+    gsap.to(E, { boost: 1, keyI: 0.7, duration: D(26), ease: 'sine.inOut' });
+    for (const p of POEMS[2]) await showPoem(p);
+
+    nextBtn.classList.remove('on');
+    await showPoem(['Para você.'], true);
+    await waitOrSkip(D(1.5));
+    setBtn('Recomeçar', true); running = false;
+  }
+
+  function restart() {
+    gsap.killTweensOf(E);
+    const kb = rgb(0xffc2c8);
+    gsap.timeline()
+      .to(E, { dissolve: 0, heroOpen: 0.04, boost: 0, keyI: 1.7, wind: 0.4, flutter: 1, floorI: 0.55, moonI: 2, rays: 0.4, camX: 0, camY: 0.15, camZ: 8.2, lookY: 0.15, fade: 0, bloom: 0.75, duration: D(7), ease: 'power2.inOut' }, 0)
+      .to(keyColor, { r: kb.r, g: kb.g, b: kb.b, duration: D(5) }, 0)
+      .to(moonPos, { x: -6, y: 7, z: -14, duration: D(7), ease: 'power2.inOut' }, 0)
+      .to(title, { opacity: 1, filter: 'blur(0px)', duration: D(3), ease: 'power2.out' }, D(3));
+    setBtn('Entrar', true);
+  }
+
+  btn.addEventListener('click', () => { if (running) return; if (btn.textContent === 'Recomeçar') restart(); else journey(); });
+})();
+
+</script>
+</body>
+</html>
